@@ -10,9 +10,18 @@ build: ## install dependencies
 	$(DOCKER_COMPOSE_BINARY) run php composer install
 
 test: ## run test suites
-	$(DOCKER_COMPOSE_BINARY) up -d --build --remove-orphans
+	@MAKE start
 	$(DOCKER_COMPOSE_BINARY) run --rm wait -c wiremock:8080 -t 60
 	$(DOCKER_COMPOSE_BINARY) exec -T php vendor/bin/phpunit -c phpunit.xml.dist --colors=always
+	@MAKE stop
+
+test-one: ## run a single test file
+	$(DOCKER_COMPOSE_BINARY) exec -T php vendor/bin/phpunit -c phpunit.xml.dist $(file)
+
+start: ## start containers
+	$(DOCKER_COMPOSE_BINARY) up -d --build --remove-orphans
+
+stop: ## stop containers
 	$(DOCKER_COMPOSE_BINARY) down
 
 cs: ## fix code style
